@@ -8,6 +8,8 @@ export default function SoftwareCompanyWebsite() {
    * Render the Ocean Professional themed Software Company layout.
    * Includes: nav, hero, services, portfolio, team, contact, footer.
    * JS behaviors (mobile nav toggle, current year, scroll reveal) are implemented via React effects.
+   * Accessibility: semantic landmarks, focus management, ARIA attributes.
+   * Assets: all images from /figmaimages with lazy loading and decoding hints.
    */
   const navMenuRef = useRef(null);
   const navToggleRef = useRef(null);
@@ -25,8 +27,7 @@ export default function SoftwareCompanyWebsite() {
     if (toggleEl && menuEl) {
       const setExpanded = (val) => {
         toggleEl.setAttribute('aria-expanded', String(val));
-        if (val) menuEl.classList.add('open');
-        else menuEl.classList.remove('open');
+        menuEl.classList.toggle('open', !!val);
       };
       const onToggle = () => setExpanded(toggleEl.getAttribute('aria-expanded') !== 'true');
       toggleEl.addEventListener('click', onToggle);
@@ -37,7 +38,8 @@ export default function SoftwareCompanyWebsite() {
       document.addEventListener('keydown', closeOnEsc);
 
       const closeOnLink = (e) => {
-        if (e.target && e.target.tagName === 'A') setExpanded(false);
+        const target = e.target;
+        if (target && target.tagName === 'A') setExpanded(false);
       };
       menuEl.addEventListener('click', closeOnLink);
 
@@ -50,9 +52,10 @@ export default function SoftwareCompanyWebsite() {
   }, []);
 
   useEffect(() => {
-    // IntersectionObserver reveal on scroll
+    // IntersectionObserver reveal on scroll (respect reduced motion)
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const els = Array.from(document.querySelectorAll('.reveal'));
-    if (!('IntersectionObserver' in window) || els.length === 0) {
+    if (prefersReduced || !('IntersectionObserver' in window) || els.length === 0) {
       els.forEach((el) => el.classList.add('in-view'));
       return;
     }
@@ -76,7 +79,14 @@ export default function SoftwareCompanyWebsite() {
       <header className="site-header" role="banner">
         <div className="container nav-container">
           <a className="brand" href="#" aria-label="Software Company Home">
-            <img className="brand-mark" src="/figmaimages/figma_image_1_611.png" alt="" />
+            <img
+              className="brand-mark"
+              src="/figmaimages/figma_image_1_611.png"
+              width="32"
+              height="32"
+              alt=""
+              aria-hidden="true"
+            />
             <span className="brand-name">OceanSoft</span>
           </a>
 
@@ -86,16 +96,18 @@ export default function SoftwareCompanyWebsite() {
               id="navToggle"
               aria-expanded="false"
               aria-controls="navMenu"
+              aria-label="Toggle navigation"
               ref={navToggleRef}
             >
-              <span className="bar"></span><span className="bar"></span><span className="bar"></span>
-              <span className="sr-only">Toggle navigation</span>
+              <span className="bar" aria-hidden="true"></span>
+              <span className="bar" aria-hidden="true"></span>
+              <span className="bar" aria-hidden="true"></span>
             </button>
-            <ul id="navMenu" className="menu" ref={navMenuRef}>
-              <li><a href="#services">Services</a></li>
-              <li><a href="#portfolio">Work</a></li>
-              <li><a href="#team">Team</a></li>
-              <li><a href="#contact" className="btn btn-primary">Contact</a></li>
+            <ul id="navMenu" className="menu" ref={navMenuRef} role="menubar">
+              <li role="none"><a role="menuitem" href="#services">Services</a></li>
+              <li role="none"><a role="menuitem" href="#portfolio">Work</a></li>
+              <li role="none"><a role="menuitem" href="#team">Team</a></li>
+              <li role="none"><a role="menuitem" href="#contact" className="btn btn-primary">Contact</a></li>
             </ul>
           </nav>
         </div>
@@ -103,11 +115,11 @@ export default function SoftwareCompanyWebsite() {
 
       <main id="main">
         {/* Hero */}
-        <section className="hero section-gradient" id="hero">
+        <section className="hero section-gradient" id="hero" aria-labelledby="hero-title">
           <div className="container hero-grid">
             <div className="hero-copy">
               <p className="eyebrow">Software Agency</p>
-              <h1>We design and build reliable digital products</h1>
+              <h1 id="hero-title">We design and build reliable digital products</h1>
               <p className="lede">
                 From concept to launch — scalable web and mobile solutions engineered for growth.
               </p>
@@ -116,16 +128,78 @@ export default function SoftwareCompanyWebsite() {
                 <a href="#portfolio" className="btn btn-ghost">View our work</a>
               </div>
               <ul className="trust-logos" aria-label="Trusted by">
-                <li><img src="/figmaimages/figma_image_1_612.png" alt="Client 1" /></li>
-                <li><img src="/figmaimages/figma_image_1_613.png" alt="Client 2" /></li>
-                <li><img src="/figmaimages/figma_image_1_614.png" alt="Client 3" /></li>
-                <li><img src="/figmaimages/figma_image_1_616.png" alt="Client 4" /></li>
+                <li>
+                  <img
+                    src="/figmaimages/figma_image_1_612.png"
+                    alt="Client 1"
+                    loading="lazy"
+                    decoding="async"
+                    width="120"
+                    height="40"
+                  />
+                </li>
+                <li>
+                  <img
+                    src="/figmaimages/figma_image_1_613.png"
+                    alt="Client 2"
+                    loading="lazy"
+                    decoding="async"
+                    width="120"
+                    height="40"
+                  />
+                </li>
+                <li>
+                  <img
+                    src="/figmaimages/figma_image_1_614.png"
+                    alt="Client 3"
+                    loading="lazy"
+                    decoding="async"
+                    width="120"
+                    height="40"
+                  />
+                </li>
+                <li>
+                  <img
+                    src="/figmaimages/figma_image_1_616.png"
+                    alt="Client 4"
+                    loading="lazy"
+                    decoding="async"
+                    width="120"
+                    height="40"
+                  />
+                </li>
               </ul>
             </div>
             <div className="hero-visual">
-              <img className="hero-illustration" src="/figmaimages/figma_image_1_760_315_746_1105_2393.png" alt="Product mockups" />
-              <img className="hero-float a" src="/figmaimages/figma_image_1_760_315_724.png" alt="" aria-hidden="true" />
-              <img className="hero-float b" src="/figmaimages/figma_image_1_678_312_690.png" alt="" aria-hidden="true" />
+              <img
+                className="hero-illustration"
+                src="/figmaimages/figma_image_1_760_315_746_1105_2393.png"
+                alt="Product mockups"
+                width="680"
+                height="480"
+                sizes="(max-width: 1024px) 92vw, 520px"
+                decoding="async"
+              />
+              <img
+                className="hero-float a"
+                src="/figmaimages/figma_image_1_760_315_724.png"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                width="220"
+                height="160"
+              />
+              <img
+                className="hero-float b"
+                src="/figmaimages/figma_image_1_678_312_690.png"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                width="220"
+                height="160"
+              />
             </div>
           </div>
         </section>
@@ -139,25 +213,61 @@ export default function SoftwareCompanyWebsite() {
             </header>
             <div className="cards services-grid">
               <article className="card reveal">
-                <img className="icon" src="/figmaimages/figma_image_1_803.png" alt="" />
+                <img
+                  className="icon"
+                  src="/figmaimages/figma_image_1_803.png"
+                  alt=""
+                  aria-hidden="true"
+                  width="40"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <h3>Product Strategy</h3>
                 <p>Discovery, roadmapping, and validation to align business goals with user needs.</p>
                 <a href="#" className="link">Learn more</a>
               </article>
               <article className="card reveal">
-                <img className="icon" src="/figmaimages/figma_image_1_805.png" alt="" />
+                <img
+                  className="icon"
+                  src="/figmaimages/figma_image_1_805.png"
+                  alt=""
+                  aria-hidden="true"
+                  width="40"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <h3>UX/UI Design</h3>
                 <p>Human-centered design systems and accessible interfaces that delight.</p>
                 <a href="#" className="link">Learn more</a>
               </article>
               <article className="card reveal">
-                <img className="icon" src="/figmaimages/figma_image_1_806.png" alt="" />
+                <img
+                  className="icon"
+                  src="/figmaimages/figma_image_1_806.png"
+                  alt=""
+                  aria-hidden="true"
+                  width="40"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <h3>Web Development</h3>
                 <p>Robust, scalable applications with modern stacks and best practices.</p>
                 <a href="#" className="link">Learn more</a>
               </article>
               <article className="card reveal">
-                <img className="icon" src="/figmaimages/figma_image_1_807.png" alt="" />
+                <img
+                  className="icon"
+                  src="/figmaimages/figma_image_1_807.png"
+                  alt=""
+                  aria-hidden="true"
+                  width="40"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <h3>Mobile Apps</h3>
                 <p>High-performance native and cross-platform experiences for iOS and Android.</p>
                 <a href="#" className="link">Learn more</a>
@@ -175,28 +285,48 @@ export default function SoftwareCompanyWebsite() {
             </header>
             <div className="portfolio-grid">
               <figure className="work-card reveal">
-                <img src="/figmaimages/figma_image_1_532.png" alt="Project dashboard" />
+                <img
+                  src="/figmaimages/figma_image_1_532.png"
+                  alt="Project dashboard"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <figcaption>
                   <h3>Analytics Dashboard</h3>
                   <p>Data visualization platform for enterprise insights.</p>
                 </figcaption>
               </figure>
               <figure className="work-card reveal">
-                <img src="/figmaimages/figma_image_1_702.png" alt="E-commerce storefront" />
+                <img
+                  src="/figmaimages/figma_image_1_702.png"
+                  alt="E-commerce storefront"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <figcaption>
                   <h3>E‑commerce</h3>
                   <p>Headless storefront with lightning-fast performance.</p>
                 </figcaption>
               </figure>
               <figure className="work-card reveal">
-                <img src="/figmaimages/figma_image_1_704.png" alt="Finance mobile app" />
+                <img
+                  src="/figmaimages/figma_image_1_704.png"
+                  alt="Finance mobile app"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <figcaption>
                   <h3>Mobile Finance</h3>
                   <p>Secure money management app with delightful UX.</p>
                 </figcaption>
               </figure>
               <figure className="work-card reveal">
-                <img src="/figmaimages/figma_image_1_766.png" alt="SaaS admin UI" />
+                <img
+                  src="/figmaimages/figma_image_1_766.png"
+                  alt="SaaS admin UI"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <figcaption>
                   <h3>SaaS Admin</h3>
                   <p>Design system and admin UX for B2B SaaS.</p>
@@ -215,28 +345,48 @@ export default function SoftwareCompanyWebsite() {
             </header>
             <div className="team-grid">
               <article className="person reveal">
-                <img src="/figmaimages/figma_image_1_820.png" alt="Portrait of team member" />
+                <img
+                  src="/figmaimages/figma_image_1_820.png"
+                  alt="Portrait of team member"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="person-info">
                   <h3>Alex Kim</h3>
                   <p className="role">Product Designer</p>
                 </div>
               </article>
               <article className="person reveal">
-                <img src="/figmaimages/figma_image_1_823.png" alt="Portrait of team member" />
+                <img
+                  src="/figmaimages/figma_image_1_823.png"
+                  alt="Portrait of team member"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="person-info">
                   <h3>Jordan Lee</h3>
                   <p className="role">Frontend Engineer</p>
                 </div>
               </article>
               <article className="person reveal">
-                <img src="/figmaimages/figma_image_1_834.png" alt="Portrait of team member" />
+                <img
+                  src="/figmaimages/figma_image_1_834.png"
+                  alt="Portrait of team member"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="person-info">
                   <h3>Riley Chen</h3>
                   <p className="role">Mobile Engineer</p>
                 </div>
               </article>
               <article className="person reveal">
-                <img src="/figmaimages/figma_image_1_845.png" alt="Portrait of team member" />
+                <img
+                  src="/figmaimages/figma_image_1_845.png"
+                  alt="Portrait of team member"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="person-info">
                   <h3>Sam Patel</h3>
                   <p className="role">Tech Lead</p>
@@ -278,7 +428,14 @@ export default function SoftwareCompanyWebsite() {
         <div className="container footer-grid">
           <div className="footer-brand">
             <a className="brand" href="#">
-              <img className="brand-mark" src="/figmaimages/figma_image_1_611.png" alt="" />
+              <img
+                className="brand-mark"
+                src="/figmaimages/figma_image_1_611.png"
+                width="32"
+                height="32"
+                alt=""
+                aria-hidden="true"
+              />
               <span className="brand-name">OceanSoft</span>
             </a>
             <p className="small">Building dependable software since 2014.</p>
